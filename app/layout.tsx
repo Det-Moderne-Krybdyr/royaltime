@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SessionWrapper from "./components/SessionWrapper";
 
 export const metadata: Metadata = {
   title: "Royal Time",
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <SessionWrapper>
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    </SessionWrapper>
   );
 }
