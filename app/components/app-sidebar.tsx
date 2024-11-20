@@ -130,14 +130,17 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session, status } = useSession(); // Get session data and status
 
-  const { data: session } = useSession(); // Get session data
+  if (status === "loading") {
+    return <div>Loading...</div>; // Show loading state when session data is being fetched
+  }
 
   // Fallback for when session data is not available
-  const user = session?.user ?? {
-    name: "Guest User",
-    email: "guest@example.com",
-    image: "/avatars/default.jpg",
+  const user = {
+    name: session?.user?.name ?? "Guest User", // Fallback to 'Guest User' if name is null or undefined
+    email: session?.user?.email ?? "guest@example.com", // Fallback to a default email
+    image: session?.user?.image ?? "/avatars/default.jpg", // Fallback to a default image
   };
 
   return (
