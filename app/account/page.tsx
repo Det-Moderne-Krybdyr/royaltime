@@ -26,7 +26,7 @@ export default function AccountPage() {
       } else {
         setError(data.error || 'An error occurred');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to fetch user. Please try again.');
     }
   };
