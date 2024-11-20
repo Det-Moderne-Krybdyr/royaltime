@@ -1,10 +1,15 @@
 'use client';
-
 import { useState } from 'react';
+
+interface User {
+  id: number;
+  email: string;
+  name: string;
+}
 
 export default function AccountPage() {
   const [email, setEmail] = useState('');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState('');
 
   const fetchUser = async (e: React.FormEvent) => {
@@ -19,9 +24,9 @@ export default function AccountPage() {
         body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
+      const data: { user?: User; error?: string } = await response.json();
 
-      if (response.ok) {
+      if (response.ok && data.user) {
         setUser(data.user);
       } else {
         setError(data.error || 'An error occurred');
