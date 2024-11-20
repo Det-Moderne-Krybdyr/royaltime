@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import "./globals.css";
 
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/app/components/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,6 +18,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({
   children,
@@ -35,6 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <main>
+        <SessionProvider>
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
@@ -58,6 +60,7 @@ export default function RootLayout({
               <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
             </SidebarInset>
           </SidebarProvider>
+          </SessionProvider>
         </main>
       </body>
     </html>

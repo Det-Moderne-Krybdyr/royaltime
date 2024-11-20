@@ -13,10 +13,10 @@ import {
   Crown,
 } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
-import { NavSecondary } from "@/components/nav-secondary";
-import { NavUser } from "@/components/nav-user";
+import { NavMain } from "@/app/components/nav-main";
+import { NavProjects } from "@/app/components/nav-projects";
+import { NavSecondary } from "@/app/components/nav-secondary";
+import { NavUser } from "@/app/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -27,13 +27,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Playground",
@@ -134,6 +130,16 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+  const { data: session } = useSession(); // Get session data
+
+  // Fallback for when session data is not available
+  const user = session?.user ?? {
+    name: "Guest User",
+    email: "guest@example.com",
+    image: "/avatars/default.jpg",
+  };
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -148,7 +154,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-semibold">Konge Software</span>
                   <span className="truncate text-xs">Udvikling</span>
                 </div>
-                </Link>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -159,7 +165,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} /> {/* Use session-based user data */}
       </SidebarFooter>
     </Sidebar>
   );
