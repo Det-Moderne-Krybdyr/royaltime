@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { auth } from "./auth";
 
 // Replace with a list of allowed emails
-const allowedEmails = ["juliuslavekonge@gmail.com", "user2@example.com", "user3@example.com"];
+const allowedEmails = ["juliuslavekonge@gmail.com", "lucasbarlach@gmail.com", "user2@example.com", "user3@example.com"];
 
 export async function middleware(request: NextRequest) {
   const session = await auth();
