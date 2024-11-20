@@ -1,9 +1,7 @@
-import Dashboard from "./components/Dashboard";
 
-export default function Home() {
+
+export default function Page() {
   return (
-    <main className="max-w-7xl mx-auto my-12 space-y-5">
-      <Dashboard/>
-    </main>
-  );
+    <h1>Hej</h1>
+  )
 }
