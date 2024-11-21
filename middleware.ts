@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Allow access to `/login` without checks
-  if (path === "/login") {
+  if (path === "/login" || path === "/api/signout") {
     return NextResponse.next();
   }
 
