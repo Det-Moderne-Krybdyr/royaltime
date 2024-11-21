@@ -16,9 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
 import { signOut } from "next-auth/react";
-import router from "next/router";
 import { redirect } from "next/navigation";
 
 export function NavUser({
