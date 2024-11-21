@@ -1,6 +1,4 @@
-// components/SignOut.tsx
-
-"use client"
+"use client";
 
 import { useRouter } from "next/navigation";
 
@@ -9,8 +7,8 @@ export default function SignOut() {
 
   const handleSignOut = async () => {
     // Call the sign-out API route
-    const response = await fetch('/api/signout', {
-      method: 'POST',
+    const response = await fetch("/api/signout", {
+      method: "POST",
     });
 
     if (response.ok) {
