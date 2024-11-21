@@ -11,17 +11,18 @@ const allowedEmails = [
 ];
 
 export async function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
-  // Allow access to `/login` without checks
-  if (path === "/login" || path === "/api/signout") {
-    return NextResponse.next();
-  }
   const session = await auth();
 
   console.log(session?.user?.id);
   console.log(session?.user?.name);
   console.log(session?.user?.email);
   console.log(session?.user?.image);
+
+  const path = request.nextUrl.pathname;
+  // Allow access to `/login` without checks
+  if (path === "/login" || path === "/api/signout") {
+    return NextResponse.next();
+  }
 
   // Redirect to `/login` if no session or invalid email
   if (
