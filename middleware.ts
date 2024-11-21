@@ -11,7 +11,6 @@ const allowedEmails = [
 ];
 
 export async function middleware(request: NextRequest) {
-    
   const path = request.nextUrl.pathname;
   // Allow access to `/login` without checks
   if (path === "/login" || path === "/api/signout") {
