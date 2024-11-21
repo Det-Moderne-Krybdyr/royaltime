@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function signOutAction() {
   "use server";
-  await signOut();
+  await signOut({ redirectTo: '/login' });
 
   // Clear session cookie or JWT token here
   const response = NextResponse.redirect("/login");
