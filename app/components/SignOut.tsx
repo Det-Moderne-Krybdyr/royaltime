@@ -11,12 +11,9 @@ export default function SignOut() {
       method: "POST",
     });
 
+    // If the sign out is successful, redirect to login
     if (response.ok) {
-      // Redirect the user after sign-out (e.g., to the login page)
       router.push("/login");
-    } else {
-      // Handle any error that occurs during sign-out
-      console.error("Sign-out failed");
     }
   };
 
