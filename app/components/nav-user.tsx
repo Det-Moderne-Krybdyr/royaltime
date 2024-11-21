@@ -1,6 +1,4 @@
 // components/NavUser.tsx
-
-import { SignOut } from "./SignOut";
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -19,6 +17,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 export function NavUser({
   user,
@@ -81,9 +80,8 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              <SignOut /> {/* Sign-out button */}
+            <DropdownMenuItem onClick={() => signOut()}>
+              <LogOut/>Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
