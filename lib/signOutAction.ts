@@ -5,6 +5,11 @@ export async function signOutAction() {
   "use server";
   await signOut();
 
-  // Redirect to /login after signing out
-  return NextResponse.redirect("/login");
+  // Clear session cookie or JWT token here
+  const response = NextResponse.redirect("/login");
+
+  // Example: Clear a session cookie (if applicable)
+  response.cookies.delete('sessionId');  // Adjust based on your session management
+  
+  return response;
 }

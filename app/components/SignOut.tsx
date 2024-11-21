@@ -6,14 +6,15 @@ export default function SignOut() {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    // Call the sign-out API route
     const response = await fetch("/api/signout", {
       method: "POST",
     });
 
-    // If the sign out is successful, redirect to login
     if (response.ok) {
+      // Use router.push to redirect to /login
       router.push("/login");
+    } else {
+      console.error("Failed to sign out");
     }
   };
 
