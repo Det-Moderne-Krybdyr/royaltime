@@ -13,11 +13,6 @@ const allowedEmails = [
 export async function middleware(request: NextRequest) {
   const session = await auth();
 
-  console.log(session?.user?.id);
-  console.log(session?.user?.name);
-  console.log(session?.user?.email);
-  console.log(session?.user?.image);
-
   const path = request.nextUrl.pathname;
   // Allow access to `/login` without checks
   if (path === "/login" || path === "/api/signout") {

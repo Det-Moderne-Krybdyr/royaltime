@@ -1,7 +1,7 @@
 "use client"
 
 import { ChevronRight, type LucideIcon } from "lucide-react"
-
+import { redirect } from "next/navigation" // Import redirect from next/navigation
 import {
   Collapsible,
   CollapsibleContent,
@@ -30,7 +30,7 @@ export function NavMain({
     items?: {
       title: string
       url: string
-    }[]
+    }[] 
   }[]
 }) {
   return (
@@ -41,10 +41,10 @@ export function NavMain({
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
+                <button onClick={() => redirect(item.url)} className="flex items-center space-x-2">
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </button>
               </SidebarMenuButton>
               {item.items?.length ? (
                 <>
@@ -59,9 +59,9 @@ export function NavMain({
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
+                            <button onClick={() => redirect(subItem.url)} className="flex items-center space-x-2">
                               <span>{subItem.title}</span>
-                            </a>
+                            </button>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}

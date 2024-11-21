@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import router from "next/router";
+import { redirect } from "next/navigation";
 
 export function NavUser({
   user,
@@ -70,9 +72,9 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => redirect("/account")}>
                 <BadgeCheck />
-                <Link href="/account">Account</Link>
+                Account
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
@@ -81,7 +83,8 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut()}>
-              <LogOut/>Sign Out
+              <LogOut />
+              Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

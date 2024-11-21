@@ -32,22 +32,22 @@ import { useSession } from "next-auth/react";
 const data = {
   navMain: [
     {
-      title: "Playground",
+      title: "Projects",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Websites",
+          url: "/websites",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Java Projects",
+          url: "/java",
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Homework",
+          url: "/homework",
         },
       ],
     },
