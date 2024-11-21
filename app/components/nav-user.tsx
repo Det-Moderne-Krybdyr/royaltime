@@ -1,12 +1,8 @@
 // components/NavUser.tsx
 
-import SignOut from "./SignOut";
+import { SignOut } from "./SignOut";
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +24,7 @@ export function NavUser({
   user,
 }: {
   user: {
-    name: string ;
+    name: string;
     email: string;
     image: string;
   };
