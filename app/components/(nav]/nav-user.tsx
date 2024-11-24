@@ -68,18 +68,6 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => redirect("/account")}>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut()}>
               <LogOut />
               Sign Out

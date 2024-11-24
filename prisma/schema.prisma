@@ -7,6 +7,22 @@ generator client {
   provider = "prisma-client-js"
 }
  
+model Week {
+  id         Int      @id @default(autoincrement())
+  weekNumber Int      @unique
+  days       Day[]
+}
+
+model Day {
+  id         Int      @id @default(autoincrement())
+  name       String
+  date       DateTime
+  absences   Int
+  weekId     Int
+  week       Week     @relation(fields: [weekId], references: [id])
+  shifts     Shift[]  // One-to-many relation with shifts
+}
+
 model User {
   id            String          @id @default(cuid())
   name          String?
@@ -15,12 +31,23 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  // Optional for WebAuthn support
   Authenticator Authenticator[]
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  shifts        Shift[]         // One-to-many relation with shifts
 }
+
+model Shift {
+  id        Int      @id @default(autoincrement())
+  startTime DateTime // Start time of the shift
+  endTime   DateTime // End time of the shift
+  userId    String   // Relation to the user
+  user      User     @relation(fields: [userId], references: [id])
+  dayId     Int      // Relation to the day
+  day       Day      @relation(fields: [dayId], references: [id])
+  type      String   // Work type (at-work, sick-leave, day-off)
+}
+
  
 model Account {
   userId            String

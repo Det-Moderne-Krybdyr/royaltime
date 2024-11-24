@@ -13,6 +13,8 @@ const allowedEmails = [
 export async function middleware(request: NextRequest) {
   const session = await auth();
 
+  console.log("Session:", session);
+
   const path = request.nextUrl.pathname;
   // Allow access to `/login` without checks
   if (path === "/login" || path === "/api/signout") {
@@ -27,6 +29,11 @@ export async function middleware(request: NextRequest) {
     !allowedEmails.includes(session.user.email)
   ) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  //redirect "/" to "/vagtplan"
+  if (request.nextUrl.pathname === "/") {
+    return NextResponse.redirect(new URL("/vagtplan", request.url));
   }
 
   // Allow request to proceed
