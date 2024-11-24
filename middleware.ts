@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "./auth";
 
-// Replace with a list of allowed emails
 const allowedEmails = [
   "juliuslavekonge@gmail.com",
   "lucasbarlach@gmail.com",
@@ -10,10 +9,14 @@ const allowedEmails = [
   "user3@example.com",
 ];
 
+// Use NEXTAUTH_URL for the base URL
+const baseURL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
 export async function middleware(request: NextRequest) {
   const session = await auth();
 
   const path = request.nextUrl.pathname;
+
   // Allow access to `/login` without checks
   if (path === "/login" || path === "/api/signout") {
     if (session && path === "/login") {
@@ -32,10 +35,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Fetch user role from an API endpoint
+  // Fetch user role from the API endpoint
   let userRole;
   try {
-    const response = await fetch(`/api/users/role`, {
+    const response = await fetch(`${baseURL}/api/users/role`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -44,12 +47,12 @@ export async function middleware(request: NextRequest) {
     });
 
     if (!response.ok) {
+      console.error(`Fetch failed: ${response.statusText}`);
       throw new Error("Failed to fetch user role");
     }
 
     const data = await response.json();
     userRole = data.role;
-    
   } catch (error) {
     console.error("Error fetching user role:", error);
     return NextResponse.redirect(new URL("/login", request.url));
@@ -61,7 +64,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect "/" to "/vagtplan"
-  if (request.nextUrl.pathname === "/") {
+  if (path === "/") {
     return NextResponse.redirect(new URL("/vagtplan", request.url));
   }
 
