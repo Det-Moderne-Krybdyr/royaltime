@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   // Fetch user role from an API endpoint
   let userRole;
   try {
-    const response = await fetch(`${request.nextUrl.origin}/api/users/role`, {
+    const response = await fetch(`/api/users/role`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
