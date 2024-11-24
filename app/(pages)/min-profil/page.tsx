@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Shift } from "@/types";
+import { Shift, HolidayRequest } from "@/types"; // Add Ferieplan type
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // ShadCN Card
 import { Badge } from "@/components/ui/badge"; // ShadCN Badge
 import { Separator } from "@/components/ui/separator"; // ShadCN Separator
@@ -12,7 +12,9 @@ const AccountPage = () => {
   const { data: session, status } = useSession();
   const [upcomingShifts, setUpcomingShifts] = useState<Shift[]>([]);
   const [pastShifts, setPastShifts] = useState<Shift[]>([]);
+  const [ferieplan, setFerieplan] = useState<HolidayRequest[]>([]); // Add ferieplan state
 
+  // Fetch user shifts
   const fetchUserShifts = async () => {
     try {
       if (!session?.user?.email) {
@@ -37,9 +39,32 @@ const AccountPage = () => {
     }
   };
 
+  const fetchFerieplan = async () => {
+    try {
+      if (!session?.user?.email) {
+        throw new Error("User email not available");
+      }
+  
+      const response = await fetch(`/api/ferieplan/user`, {
+        method: "GET",
+        headers: {
+          "x-user-email": session.user.email, // Pass the user's email in the header
+        },
+      });
+  
+      if (!response.ok) throw new Error("Failed to fetch ferieplan");
+  
+      const ferieData = await response.json();
+      setFerieplan(ferieData.ferieplan);
+    } catch (error) {
+      console.error("Error fetching ferieplan:", error);
+    }
+  };
+
   useEffect(() => {
     if (status === "authenticated") {
       fetchUserShifts();
+      fetchFerieplan(); // Fetch ferieplan on load
     }
   }, [status]);
 
@@ -48,7 +73,7 @@ const AccountPage = () => {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div>
       {/* User Header */}
       <Card className="mb-6">
         <CardHeader className="flex items-center justify-between">
@@ -105,6 +130,42 @@ const AccountPage = () => {
             ))
           ) : (
             <p className="text-gray-500">Ingen kommende vagter.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Ferieplan */}
+      <div className="mb-6">
+        <h2 className="text-lg font-bold mb-4">Dine ferieplaner</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {ferieplan.length > 0 ? (
+            ferieplan.map((ferie) => (
+              <Card key={ferie.id}>
+                <CardContent className="text-center">
+                  <p className="text-lg font-semibold">
+                    {new Date(ferie.startDate).toLocaleDateString(undefined, {
+                      weekday: "long",
+                    })}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(ferie.startDate).toLocaleDateString(undefined, {
+                      day: "2-digit",
+                      month: "long",
+                    })}{" "}
+                    -{" "}
+                    {new Date(ferie.endDate).toLocaleDateString(undefined, {
+                      day: "2-digit",
+                      month: "long",
+                    })}
+                  </p>
+                  <Badge variant="outline" className="mt-2">
+                    {ferie.status}
+                  </Badge>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p className="text-gray-500">Ingen registrerede ferieplaner.</p>
           )}
         </div>
       </div>

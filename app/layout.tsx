@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import "./globals.css";
 
-import { AppSidebar } from "@/app/components/(nav]/app-sidebar";
+import { AppSidebar } from "@/app/components/(nav)/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -20,7 +20,7 @@ export default function RootLayout({
   const pathname = usePathname();
 
   // Render children directly without layout for `/login`
-  if (pathname === "/login") {
+  if (pathname === "/login" || pathname === "/denied") {
     return <html><body>{children}</body></html>;
   }
 

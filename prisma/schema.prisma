@@ -2,53 +2,67 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
- 
+
 generator client {
   provider = "prisma-client-js"
 }
- 
+
 model Week {
-  id         Int      @id @default(autoincrement())
-  weekNumber Int      @unique
+  id         Int   @id @default(autoincrement())
+  weekNumber Int   @unique
   days       Day[]
 }
 
 model Day {
-  id         Int      @id @default(autoincrement())
-  name       String
-  date       DateTime
-  absences   Int
-  weekId     Int
-  week       Week     @relation(fields: [weekId], references: [id])
-  shifts     Shift[]  // One-to-many relation with shifts
+  id       Int      @id @default(autoincrement())
+  name     String
+  date     DateTime
+  absences Int
+  weekId   Int
+  week     Week     @relation(fields: [weekId], references: [id])
+  shifts   Shift[] // One-to-many relation with shifts
 }
 
 model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  Authenticator Authenticator[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  shifts        Shift[]         // One-to-many relation with shifts
+  id              String           @id @default(cuid())
+  name            String?
+  email           String           @unique
+  emailVerified   DateTime?
+  image           String?
+  accounts        Account[]
+  sessions        Session[]
+  Authenticator   Authenticator[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  shifts          Shift[] // One-to-many relation with shifts
+  role            UserRole         @default(user)
+  holidayRequests HolidayRequest[] // Relation to holiday requests
 }
 
 model Shift {
   id        Int      @id @default(autoincrement())
-  startTime DateTime // Start time of the shift
-  endTime   DateTime // End time of the shift
-  userId    String   // Relation to the user
+  startTime DateTime?
+  endTime   DateTime?
+  type      String
+  userId    String
   user      User     @relation(fields: [userId], references: [id])
-  dayId     Int      // Relation to the day
+  dayId     Int
   day       Day      @relation(fields: [dayId], references: [id])
-  type      String   // Work type (at-work, sick-leave, day-off)
+  status    String   @default("default")
 }
 
- 
+model HolidayRequest {
+  id        Int      @id @default(autoincrement())
+  userId    String // Relation to the user
+  user      User     @relation(fields: [userId], references: [id])
+  startDate DateTime
+  endDate   DateTime
+  reason    String? // Optional reason for the holiday request
+  status    String   @default("pending") // Request status: pending, approved, or rejected
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Account {
   userId            String
   type              String
@@ -61,33 +75,33 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
- 
+
 model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
 }
- 
+
 // Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
@@ -98,8 +112,13 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([userId, credentialID])
+}
+
+enum UserRole {
+  admin
+  user
 }

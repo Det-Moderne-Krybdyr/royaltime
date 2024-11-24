@@ -4,10 +4,11 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  // Delete existing data
+  // Clear existing data
   await prisma.shift.deleteMany();
   await prisma.day.deleteMany();
   await prisma.week.deleteMany();
+  await prisma.holidayRequest.deleteMany();
   await prisma.user.deleteMany();
 
   // Seed users
@@ -20,22 +21,19 @@ async function main() {
   }
 
   await prisma.user.createMany({ data: users });
-  console.log('Users created.');
-
   const userRecords = await prisma.user.findMany();
 
   // Helper function to get random user
-  const getRandomUser = () =>
-    userRecords[Math.floor(Math.random() * userRecords.length)];
-
-  // Helper function to generate random shift type
-  const getRandomShiftType = () => {
-    const types = ['at-work', 'sick-leave', 'day-off'];
-    return types[Math.floor(Math.random() * types.length)];
+  const getRandomUser = (usedUserIds) => {
+    const availableUsers = userRecords.filter(
+      (user) => !usedUserIds.has(user.id)
+    );
+    return availableUsers[
+      Math.floor(Math.random() * availableUsers.length)
+    ];
   };
 
   // Seed weeks and days
-  const weeks = [];
   for (let weekNum = 47; weekNum <= 50; weekNum++) {
     const days = [];
     const dayNames = [
@@ -47,61 +45,55 @@ async function main() {
       'Lørdag',
       'Søndag',
     ];
-    const baseDate = new Date(2024, 10, 18 + (weekNum - 47) * 7); // Start date for weeks
+    const baseDate = new Date(2024, 10, 18 + (weekNum - 47) * 7);
 
     for (let i = 0; i < 7; i++) {
       const shifts = [];
-      for (let j = 0; j < 10; j++) {
-        const shiftType = getRandomShiftType();
-        const randomUser = getRandomUser();
+      const isWeekend = i >= 5;
+      const usedUserIds = new Set();
+
+      for (let j = 0; j < 5; j++) {
+        const randomUser = getRandomUser(usedUserIds);
+        if (!randomUser) break; // Stop if no users are left
+
+        const shiftType = isWeekend
+          ? 'day-off'
+          : Math.random() < 0.1
+          ? 'sick-leave'
+          : 'at-work';
 
         shifts.push({
-          startTime: new Date(
-            baseDate.getFullYear(),
-            baseDate.getMonth(),
-            baseDate.getDate() + i,
-            8 + j,
-            0
-          ), // Shift times vary slightly
-          endTime: new Date(
-            baseDate.getFullYear(),
-            baseDate.getMonth(),
-            baseDate.getDate() + i,
-            16 + j,
-            0
-          ),
+          startTime: shiftType === 'at-work' ? new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + i, 8, 0) : null,
+          endTime: shiftType === 'at-work' ? new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + i, 16, 0) : null,
           type: shiftType,
+          status: shiftType === 'at-work' ? 'default' : 'updated',
           userId: randomUser.id,
         });
+
+        usedUserIds.add(randomUser.id);
       }
 
       days.push({
-        name: dayNames[i % dayNames.length],
-        date: new Date(
-          baseDate.getFullYear(),
-          baseDate.getMonth(),
-          baseDate.getDate() + i
-        ),
-        absences: Math.floor(Math.random() * 5), // Random absences between 0–5
+        name: dayNames[i],
+        date: new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + i),
+        absences: shifts.filter((shift) => shift.type !== 'at-work').length,
         shifts: {
           create: shifts,
         },
       });
     }
 
-    weeks.push({
-      weekNumber: weekNum,
-      days: {
-        create: days,
+    await prisma.week.create({
+      data: {
+        weekNumber: weekNum,
+        days: {
+          create: days,
+        },
       },
     });
   }
 
-  for (const week of weeks) {
-    await prisma.week.create({ data: week });
-  }
-
-  console.log('Weeks, days, and shifts seeded.');
+  console.log('Seeding complete!');
 }
 
 main()

@@ -13,11 +13,12 @@ const allowedEmails = [
 export async function middleware(request: NextRequest) {
   const session = await auth();
 
-  console.log("Session:", session);
-
   const path = request.nextUrl.pathname;
   // Allow access to `/login` without checks
   if (path === "/login" || path === "/api/signout") {
+    if (session && path === "/login") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
     return NextResponse.next();
   }
 
@@ -31,7 +32,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  //redirect "/" to "/vagtplan"
+  // Fetch user role from an API endpoint
+  let userRole;
+  try {
+    const response = await fetch(`${request.nextUrl.origin}/api/users/role`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: session.user.email }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user role");
+    }
+
+    const data = await response.json();
+    userRole = data.role;
+    
+  } catch (error) {
+    console.error("Error fetching user role:", error);
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Allow access to `/admin/*` only for users with the role "admin"
+  if (path.startsWith("/admin") && userRole !== "admin") {
+    return NextResponse.redirect(new URL("/denied", request.url));
+  }
+
+  // Redirect "/" to "/vagtplan"
   if (request.nextUrl.pathname === "/") {
     return NextResponse.redirect(new URL("/vagtplan", request.url));
   }

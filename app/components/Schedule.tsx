@@ -2,7 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import ShiftModal from "./ShiftModal";
-import { Week, Shift, User } from "@/types";
+import { Week, Shift, User, ShiftType } from "@/types"; // Import ShiftType
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 const Schedule = () => {
   const [currentWeek, setCurrentWeek] = useState<Week | null>(null);
@@ -94,83 +98,86 @@ const Schedule = () => {
 
       {/* Pagination Controls */}
       <div className="flex justify-between mb-4">
-        <button
+        <Button
           onClick={handlePreviousWeek}
-          className={`px-4 py-2 rounded ${
-            currentWeekIndex === 1 ? "bg-gray-300" : "bg-blue-500 text-white"
-          }`}
+          variant={currentWeekIndex === 1 ? "ghost" : "default"}
           disabled={currentWeekIndex === 1}
         >
           Previous Week
-        </button>
-        <button
-          onClick={handleNextWeek}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
+        </Button>
+        <Button onClick={handleNextWeek} variant="default">
           Next Week
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-7 gap-4">
         {currentWeek.days.map((day) => {
-          // Sort shifts by type: at work -> sick leave -> day off
-          const sortedShifts = [...day.shifts].sort((a, b) => {
-            const order = { "at-work": 1, "sick-leave": 2, "day-off": 3 };
-            return order[a.type] - order[b.type];
-          });
+          // Sort shifts by type using ShiftType enum
+          const order = {
+            [ShiftType.AT_WORK]: 1,
+            [ShiftType.SICK_LEAVE]: 2,
+            [ShiftType.DAY_OFF]: 3,
+          };
+          const sortedShifts = [...day.shifts].sort((a, b) => order[a.type] - order[b.type]);
 
           const absentees = sortedShifts.filter(
-            (shift) => shift.type === "sick-leave" || shift.type === "day-off"
+            (shift) => shift.type === ShiftType.SICK_LEAVE || shift.type === ShiftType.DAY_OFF
           ).length;
 
           return (
-            <div
-              key={day.id}
-              className="border border-gray-200 rounded-lg shadow p-4 bg-white"
-            >
-              <h2 className="text-lg font-bold">{day.name}</h2>
-              <p className="text-sm text-gray-500">
-                {new Date(day.date).toLocaleDateString()}
-              </p>
-              <p className="text-red-500 font-semibold">{absentees} Fraværende</p>
-              <div className="mt-2">
-                {sortedShifts.map((shift) => (
-                  <div
-                    key={shift.id}
-                    className={`p-2 mb-2 rounded cursor-pointer ${
-                      shift.type === "sick-leave"
-                        ? "bg-yellow-200"
-                        : shift.type === "day-off"
-                        ? "bg-gray-300"
-                        : "bg-green-200"
-                    }`}
-                    onClick={() => setSelectedShift(shift)}
-                  >
-                    <p className="font-semibold">{shift.user.name}</p>
-                    {shift.type !== "day-off" && (
-                      <p className="text-sm">
-                        {new Date(shift.startTime).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        -{" "}
-                        {new Date(shift.endTime).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    )}
-                    <p className="text-sm italic">
-                      {shift.type === "at-work"
-                        ? "At work"
-                        : shift.type === "sick-leave"
-                        ? "Sick leave"
-                        : "Day off"}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Card key={day.id} className="bg-white">
+              <CardHeader>
+                <CardTitle>{day.name}</CardTitle>
+                <p className="text-sm text-gray-500">
+                  {new Date(day.date).toLocaleDateString()}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <Separator className="my-2" />
+                <Badge variant="destructive" className="mb-2">
+                  {absentees} Absent
+                </Badge>
+                <div className="mt-2">
+                  {sortedShifts.map((shift) => (
+                    <Card
+                      key={shift.id}
+                      className={`p-2 mb-2 rounded cursor-pointer shadow ${
+                        shift.type === ShiftType.SICK_LEAVE
+                          ? "bg-yellow-200"
+                          : shift.type === ShiftType.DAY_OFF
+                          ? "bg-gray-300"
+                          : "bg-green-200"
+                      }`}
+                      onClick={() => setSelectedShift(shift)}
+                    >
+                      <CardContent className="text-center">
+                        <p className="font-semibold">{shift.user.name}</p>
+                        {shift.type !== ShiftType.DAY_OFF && (
+                          <p className="text-sm">
+                            {new Date(shift.startTime).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}{" "}
+                            -{" "}
+                            {new Date(shift.endTime).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        )}
+                        <p className="text-sm italic">
+                          {shift.type === ShiftType.AT_WORK
+                            ? "At work"
+                            : shift.type === ShiftType.SICK_LEAVE
+                            ? "Sick leave"
+                            : "Day off"}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
