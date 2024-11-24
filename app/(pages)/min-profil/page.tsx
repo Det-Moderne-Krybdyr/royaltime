@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { Shift, HolidayRequest } from "@/types"; // Add Ferieplan type
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // ShadCN Card
-import { Badge } from "@/components/ui/badge"; // ShadCN Badge
-import { Separator } from "@/components/ui/separator"; // ShadCN Separator
-import { Skeleton } from "@/components/ui/skeleton"; // ShadCN Skeleton
+import { Shift, HolidayRequest } from "@/types";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AccountPage = () => {
   const { data: session, status } = useSession();
   const [upcomingShifts, setUpcomingShifts] = useState<Shift[]>([]);
   const [pastShifts, setPastShifts] = useState<Shift[]>([]);
-  const [ferieplan, setFerieplan] = useState<HolidayRequest[]>([]); // Add ferieplan state
+  const [ferieplan, setFerieplan] = useState<HolidayRequest[]>([]);
 
   // Fetch user shifts
-  const fetchUserShifts = async () => {
+  const fetchUserShifts = useCallback(async () => {
     try {
       if (!session?.user?.email) {
         throw new Error("User email not available");
@@ -27,7 +27,6 @@ const AccountPage = () => {
       const user = await response.json();
       const now = new Date();
 
-      // Sort shifts into upcoming and past
       setUpcomingShifts(
         user.shifts.filter((shift: Shift) => new Date(shift.startTime) >= now)
       );
@@ -37,36 +36,38 @@ const AccountPage = () => {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [session?.user?.email]);
 
-  const fetchFerieplan = async () => {
+  // Fetch ferieplan
+  const fetchFerieplan = useCallback(async () => {
     try {
       if (!session?.user?.email) {
         throw new Error("User email not available");
       }
-  
+
       const response = await fetch(`/api/ferieplan/user`, {
         method: "GET",
         headers: {
-          "x-user-email": session.user.email, // Pass the user's email in the header
+          "x-user-email": session.user.email,
         },
       });
-  
+
       if (!response.ok) throw new Error("Failed to fetch ferieplan");
-  
+
       const ferieData = await response.json();
       setFerieplan(ferieData.ferieplan);
     } catch (error) {
       console.error("Error fetching ferieplan:", error);
     }
-  };
+  }, [session?.user?.email]);
 
+  // Use effect to fetch data on load
   useEffect(() => {
     if (status === "authenticated") {
       fetchUserShifts();
-      fetchFerieplan(); // Fetch ferieplan on load
+      fetchFerieplan();
     }
-  }, [status]);
+  }, [status, fetchUserShifts, fetchFerieplan]);
 
   if (status === "loading") {
     return <Skeleton className="h-64 w-full" />;

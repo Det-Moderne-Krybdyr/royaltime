@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request, { params }: { params: { email?: string } }) {
-  // Ensure `params.email` is awaited and safely accessed
-  const { email } = await params;
-
-  if (!email) {
-    return NextResponse.json(
-      { error: "User email is required" },
-      { status: 400 }
-    );
-  }
-
+export async function GET(
+  request: Request,
+  context: { params: Promise<{ email?: string }> } // Correctly typed as a Promise
+) {
   try {
+    // Await `params` because it is asynchronous in the app directory
+    const { email } = await context.params;
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "User email is required" },
+        { status: 400 }
+      );
+    }
+
     // Fetch user details by email
     const user = await prisma.user.findUnique({
       where: { email },

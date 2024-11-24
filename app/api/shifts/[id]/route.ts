@@ -1,15 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const shiftId = parseInt(params.id, 10);
-
-  if (isNaN(shiftId)) {
-    return NextResponse.json({ error: "Invalid shift ID" }, { status: 400 });
-  }
-
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> } // Correct type for params
+) {
   try {
+    // Await `params` because it is asynchronous in the `app` directory
+    const { id } = await context.params;
+    const shiftId = parseInt(id, 10);
+
+    if (isNaN(shiftId)) {
+      return NextResponse.json({ error: "Invalid shift ID" }, { status: 400 });
+    }
+
     const body = await req.json();
+
+    // Update shift in the database
     const updatedShift = await prisma.shift.update({
       where: { id: shiftId },
       data: {
@@ -20,9 +27,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       },
       include: { user: true },
     });
+
     return NextResponse.json(updatedShift);
   } catch (error) {
     console.error("Failed to update shift:", error);
-    return NextResponse.json({ error: "Failed to update shift" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update shift" },
+      { status: 500 }
+    );
   }
 }

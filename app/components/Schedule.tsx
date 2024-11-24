@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ShiftModal from "./ShiftModal";
 import { Week, Shift, User, ShiftType } from "@/types"; // Import ShiftType
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ const Schedule = () => {
   const [userRecords, setUserRecords] = useState<User[]>([]);
 
   // Fetch users from API
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch("/api/users");
       if (!response.ok) throw new Error("Failed to fetch users");
@@ -24,10 +24,10 @@ const Schedule = () => {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
-  };
+  }, []);
 
   // Fetch week data based on the current week index
-  const fetchWeekData = async (weekNumber: number) => {
+  const fetchWeekData = useCallback(async (weekNumber: number) => {
     try {
       const response = await fetch(`/api/schedule/${weekNumber}`);
       if (!response.ok) throw new Error("Failed to fetch week data");
@@ -42,21 +42,17 @@ const Schedule = () => {
       console.error("Error fetching week data:", error);
       setCurrentWeek(null); // Clear current week on failure
     }
-  };
+  }, []);
 
   // Handle pagination (Previous/Next week)
   const handlePreviousWeek = () => {
     if (currentWeekIndex > 1) {
-      const newWeekIndex = currentWeekIndex - 1;
-      setCurrentWeekIndex(newWeekIndex);
-      fetchWeekData(newWeekIndex);
+      setCurrentWeekIndex((prevIndex) => prevIndex - 1);
     }
   };
 
   const handleNextWeek = () => {
-    const newWeekIndex = currentWeekIndex + 1;
-    setCurrentWeekIndex(newWeekIndex);
-    fetchWeekData(newWeekIndex);
+    setCurrentWeekIndex((prevIndex) => prevIndex + 1);
   };
 
   // Save shift to API
@@ -85,8 +81,11 @@ const Schedule = () => {
 
   useEffect(() => {
     fetchUsers();
+  }, [fetchUsers]); // `fetchUsers` is memoized, so it's safe to include
+
+  useEffect(() => {
     fetchWeekData(currentWeekIndex);
-  }, []);
+  }, [fetchWeekData, currentWeekIndex]); // Include `currentWeekIndex` and memoized `fetchWeekData`
 
   if (!currentWeek) {
     return <div>Loading...</div>;

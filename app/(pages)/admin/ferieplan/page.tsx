@@ -1,8 +1,7 @@
 "use client";
 
-import { ShiftType } from "@/types"; 
 import React, { useEffect, useState } from "react";
-import { HolidayRequest } from "@/types";
+import { HolidayRequest, ShiftType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,8 +12,8 @@ const HolidayAdmin = () => {
   const [holidayRequests, setHolidayRequests] = useState<HolidayRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<HolidayRequest | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [shiftActions, setShiftActions] = useState<string[]>([]); // Enum values for shiftAction
-  const [shiftAction, setShiftAction] = useState<string>("X");
+  const [shiftActions, setShiftActions] = useState<string[]>([]);
+  const [shiftAction, setShiftAction] = useState<ShiftType>(ShiftType.AT_WORK);
 
   // Fetch holiday requests
   const fetchHolidayRequests = async () => {
@@ -28,9 +27,10 @@ const HolidayAdmin = () => {
     }
   };
 
-  // Fetch shift actions (enum values)
+  // Fetch shift actions from ShiftType enum
   const fetchShiftActions = () => {
-    return Object.values(ShiftType);
+    const actions = Object.values(ShiftType);
+    setShiftActions(actions);
   };
 
   // Update holiday request and shifts
@@ -42,7 +42,7 @@ const HolidayAdmin = () => {
         body: JSON.stringify({
           status: request.status,
           reason: request.reason,
-          shiftAction, // Pass the selected shift action
+          shiftAction,
           startDate: request.startDate,
           endDate: request.endDate,
           userId: request.user.id,
@@ -52,7 +52,7 @@ const HolidayAdmin = () => {
       if (!response.ok) throw new Error("Failed to update holiday request");
 
       alert("Holiday request updated successfully!");
-      fetchHolidayRequests(); // Refresh the list
+      fetchHolidayRequests();
       setSelectedRequest(null);
     } catch (error) {
       console.error("Error updating holiday request:", error);
@@ -68,7 +68,7 @@ const HolidayAdmin = () => {
       if (!response.ok) throw new Error("Failed to delete holiday request");
 
       alert("Holiday request deleted successfully!");
-      fetchHolidayRequests(); // Refresh the list
+      fetchHolidayRequests();
     } catch (error) {
       console.error("Error deleting holiday request:", error);
     }
@@ -91,30 +91,15 @@ const HolidayAdmin = () => {
 
       {/* Filter Controls */}
       <div className="mb-4 flex gap-4">
-        <Button
-          onClick={() => setFilterStatus("all")}
-          variant={filterStatus === "all" ? "default" : "outline"}
-        >
-          All
-        </Button>
-        <Button
-          onClick={() => setFilterStatus("pending")}
-          variant={filterStatus === "pending" ? "default" : "outline"}
-        >
-          Pending
-        </Button>
-        <Button
-          onClick={() => setFilterStatus("approved")}
-          variant={filterStatus === "approved" ? "default" : "outline"}
-        >
-          Approved
-        </Button>
-        <Button
-          onClick={() => setFilterStatus("rejected")}
-          variant={filterStatus === "rejected" ? "default" : "outline"}
-        >
-          Rejected
-        </Button>
+        {["all", "pending", "approved", "rejected"].map((status) => (
+          <Button
+            key={status}
+            onClick={() => setFilterStatus(status)}
+            variant={filterStatus === status ? "default" : "outline"}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </Button>
+        ))}
       </div>
 
       {/* Holiday Requests Table */}
@@ -141,10 +126,7 @@ const HolidayAdmin = () => {
                 <Button variant="outline" onClick={() => setSelectedRequest(request)}>
                   Edit
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => deleteHolidayRequest(request.id)}
-                >
+                <Button variant="destructive" onClick={() => deleteHolidayRequest(request.id)}>
                   Delete
                 </Button>
               </TableCell>
@@ -170,7 +152,7 @@ const HolidayAdmin = () => {
                     onChange={(e) =>
                       setSelectedRequest({
                         ...selectedRequest,
-                        status: e.target.value as "pending" | "approved" | "rejected",
+                        status: e.target.value as HolidayRequest["status"],
                       })
                     }
                     className="border rounded p-2 w-full"
@@ -185,12 +167,12 @@ const HolidayAdmin = () => {
                   <select
                     id="shiftAction"
                     value={shiftAction}
-                    onChange={(e) => setShiftAction(e.target.value)}
+                    onChange={(e) => setShiftAction(e.target.value as ShiftType)}
                     className="border rounded p-2 w-full"
                   >
                     {shiftActions.map((action) => (
                       <option key={action} value={action}>
-                        {action.replace("_", " ").toLowerCase()}
+                        {action.replace("-", " ").toUpperCase()}
                       </option>
                     ))}
                   </select>
@@ -206,17 +188,10 @@ const HolidayAdmin = () => {
                   />
                 </div>
                 <div className="flex gap-4">
-                  <Button
-                    onClick={() => updateHolidayRequest(selectedRequest)}
-                    className="w-full"
-                  >
+                  <Button onClick={() => updateHolidayRequest(selectedRequest)} className="w-full">
                     Save
                   </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => setSelectedRequest(null)}
-                    className="w-full"
-                  >
+                  <Button variant="ghost" onClick={() => setSelectedRequest(null)} className="w-full">
                     Cancel
                   </Button>
                 </div>

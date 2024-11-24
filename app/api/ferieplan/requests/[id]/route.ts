@@ -14,9 +14,12 @@ const endOfDay = (date: string) => {
 };
 
 // PUT method
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json(
@@ -79,10 +82,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-// DELETE method
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> } // Correctly typed as Promise
+) {
   try {
-    const { id } = params;
+    // Await params as required in the app directory
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json(
@@ -93,9 +99,6 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
     const holidayRequest = await prisma.holidayRequest.findUnique({
       where: { id: parseInt(id, 10) },
-      include: {
-        user: true,
-      },
     });
 
     if (!holidayRequest) {
@@ -104,23 +107,6 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
         { status: 404 }
       );
     }
-
-    // Restore shifts to "AT_WORK"
-    await prisma.shift.updateMany({
-      where: {
-        userId: holidayRequest.userId,
-        day: {
-          date: {
-            gte: holidayRequest.startDate,
-            lte: holidayRequest.endDate,
-          },
-        },
-      },
-      data: {
-        type: ShiftType.AT_WORK, // Use the ShiftType enum value
-        status: "default",
-      },
-    });
 
     // Delete the holiday request
     await prisma.holidayRequest.delete({

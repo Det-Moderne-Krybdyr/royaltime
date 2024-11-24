@@ -20,9 +20,6 @@ const HolidayPlan = () => {
     reason: "",
   });
 
-  if (status === "loading") return <div>Loading...</div>;
-  if (status === "unauthenticated") return <div>Please log in.</div>;
-
   // Fetch week data based on the current week index
   const fetchWeekData = async (weekNumber: number) => {
     try {
@@ -99,11 +96,15 @@ const HolidayPlan = () => {
       console.error("Error submitting holiday request:", error);
     }
   };
-  
 
+  // Fetch week data whenever the currentWeekIndex changes
   useEffect(() => {
     fetchWeekData(currentWeekIndex);
   }, [currentWeekIndex]);
+
+  // Early returns for loading and unauthenticated states
+  if (status === "loading") return <div>Loading...</div>;
+  if (status === "unauthenticated") return <div>Please log in.</div>;
 
   if (!currentWeek) {
     return <div>Loading...</div>;
