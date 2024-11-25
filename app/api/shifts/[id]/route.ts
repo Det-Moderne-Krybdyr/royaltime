@@ -24,6 +24,7 @@ export async function PUT(
         endTime: body.endTime,
         type: body.type,
         userId: body.user.id,
+        break: body.break,
       },
       include: { user: true },
     });

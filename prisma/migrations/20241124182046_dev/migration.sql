@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Shift" ADD COLUMN     "break" INTEGER NOT NULL DEFAULT 0;

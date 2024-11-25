@@ -2,19 +2,41 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import ShiftModal from "./ShiftModal";
-import { Week, Shift, User, ShiftType } from "@/types"; // Import ShiftType
+import { Week, Shift, User, ShiftType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useSession } from "next-auth/react";
 
 const Schedule = () => {
+  const { data: session } = useSession();
   const [currentWeek, setCurrentWeek] = useState<Week | null>(null);
-  const [currentWeekIndex, setCurrentWeekIndex] = useState(47); // Default to week 47
+  const [currentWeekIndex, setCurrentWeekIndex] = useState(47);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [userRecords, setUserRecords] = useState<User[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false); // State to track admin role
 
-  // Fetch users from API
+  // Check user role
+  const fetchUserRole = useCallback(async () => {
+    if (!session?.user?.email) return;
+
+    try {
+      const response = await fetch("/api/users/role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: session.user.email }),
+      });
+      if (!response.ok) throw new Error("Failed to fetch user role");
+
+      const data = await response.json();
+      setIsAdmin(data.role === "admin");
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+    }
+  }, [session?.user?.email]);
+
+  // Fetch users
   const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch("/api/users");
@@ -26,7 +48,7 @@ const Schedule = () => {
     }
   }, []);
 
-  // Fetch week data based on the current week index
+  // Fetch week data
   const fetchWeekData = useCallback(async (weekNumber: number) => {
     try {
       const response = await fetch(`/api/schedule/${weekNumber}`);
@@ -35,16 +57,16 @@ const Schedule = () => {
 
       setCurrentWeek({
         id: data.id ?? 0,
-        weekNumber: data.weekNumber ?? weekNumber, // Fallback to current week index
+        weekNumber: data.weekNumber ?? weekNumber,
         days: data.days,
       });
     } catch (error) {
       console.error("Error fetching week data:", error);
-      setCurrentWeek(null); // Clear current week on failure
+      setCurrentWeek(null);
     }
   }, []);
 
-  // Handle pagination (Previous/Next week)
+  // Pagination handlers
   const handlePreviousWeek = () => {
     if (currentWeekIndex > 1) {
       setCurrentWeekIndex((prevIndex) => prevIndex - 1);
@@ -65,11 +87,13 @@ const Schedule = () => {
       });
       if (!response.ok) throw new Error("Failed to save shift");
 
+      const updatedShiftData = await response.json();
+
       // Update shifts locally
       const updatedDays = currentWeek?.days.map((day) => ({
         ...day,
         shifts: day.shifts.map((shift) =>
-          shift.id === updatedShift.id ? updatedShift : shift
+          shift.id === updatedShift.id ? updatedShiftData : shift
         ),
       }));
 
@@ -79,13 +103,15 @@ const Schedule = () => {
     }
   };
 
+  // Fetch data on component load
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]); // `fetchUsers` is memoized, so it's safe to include
+    fetchUserRole();
+  }, [fetchUsers, fetchUserRole]);
 
   useEffect(() => {
     fetchWeekData(currentWeekIndex);
-  }, [fetchWeekData, currentWeekIndex]); // Include `currentWeekIndex` and memoized `fetchWeekData`
+  }, [fetchWeekData, currentWeekIndex]);
 
   if (!currentWeek) {
     return <div>Loading...</div>;
@@ -111,7 +137,7 @@ const Schedule = () => {
 
       <div className="grid grid-cols-7 gap-4">
         {currentWeek.days.map((day) => {
-          // Sort shifts by type using ShiftType enum
+          // Sort shifts by type
           const order = {
             [ShiftType.AT_WORK]: 1,
             [ShiftType.SICK_LEAVE]: 2,
@@ -147,7 +173,7 @@ const Schedule = () => {
                           ? "bg-gray-300"
                           : "bg-green-200"
                       }`}
-                      onClick={() => setSelectedShift(shift)}
+                      onClick={() => isAdmin && setSelectedShift(shift)} // Only allow editing if user is admin
                     >
                       <CardContent className="text-center">
                         <p className="font-semibold">{shift.user.name}</p>
@@ -171,6 +197,9 @@ const Schedule = () => {
                             ? "Sick leave"
                             : "Day off"}
                         </p>
+                        <p className="text-sm italic">
+                          {shift.break} min pause
+                        </p>
                       </CardContent>
                     </Card>
                   ))}
@@ -181,7 +210,7 @@ const Schedule = () => {
         })}
       </div>
 
-      {selectedShift && (
+      {selectedShift && isAdmin && ( // Render modal only if admin
         <ShiftModal
           shift={selectedShift}
           users={userRecords}

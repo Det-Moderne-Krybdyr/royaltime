@@ -7,6 +7,7 @@ import {
   User,
   Settings,
   Crown,
+  Users,
 } from "lucide-react";
 
 import { NavMain } from "@/app/components/(nav)/nav-main";
@@ -29,10 +30,12 @@ const data = {
     { title: "Vagtplan", url: "/vagtplan", icon: CalendarDays },
     { title: "Ferieplan", url: "/ferieplan", icon: Plane },
     { title: "Min profil", url: "/min-profil", icon: User },
-    { title: "Indstillinger", url: "/indstillinger", icon: Settings },
   ],
   navAdmin: [
+    { title: "Vagtplan", url: "/admin/vagtplan", icon: CalendarDays },
     { title: "Ferieplan", url: "/admin/ferieplan", icon: Plane },
+    { title: "Brugere", url: "/admin/brugere", icon: Users  },
+    { title: "Indstillinger", url: "/admin/indstillinger", icon: Plane },
   ],
 };
 

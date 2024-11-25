@@ -12,7 +12,6 @@ const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }
   const [updatedShift, setUpdatedShift] = useState<Shift>(shift);
   const [userSearch, setUserSearch] = useState<string>("");
 
-  // Filter users only when input is not empty
   const filteredUsers = userSearch
     ? users.filter((user) =>
         user.name.toLowerCase().includes(userSearch.toLowerCase())
@@ -91,6 +90,20 @@ const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }
               })
             }
             className="border border-gray-300 rounded p-2 w-full"
+          />
+        </label>
+
+        {/* Break Duration */}
+        <label className="block mb-4">
+          Break (minutes):
+          <input
+            type="number"
+            value={updatedShift.break || 0}
+            onChange={(e) =>
+              setUpdatedShift({ ...updatedShift, break: parseInt(e.target.value) })
+            }
+            className="border border-gray-300 rounded p-2 w-full"
+            min="0"
           />
         </label>
 

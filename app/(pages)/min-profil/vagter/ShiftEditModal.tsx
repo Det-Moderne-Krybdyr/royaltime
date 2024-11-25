@@ -10,9 +10,10 @@ interface ShiftEditModalProps {
 const ShiftEditModal: React.FC<ShiftEditModalProps> = ({ shift, onClose, onSave }) => {
   const [startTime, setStartTime] = useState(shift.startTime);
   const [endTime, setEndTime] = useState(shift.endTime);
+  const [breakTime, setBreakTime] = useState(shift.break || 0);
 
   const handleSave = () => {
-    onSave({ ...shift, startTime, endTime });
+    onSave({ ...shift, startTime, endTime, break: breakTime });
   };
 
   return (
@@ -35,6 +36,16 @@ const ShiftEditModal: React.FC<ShiftEditModalProps> = ({ shift, onClose, onSave 
             value={new Date(endTime).toISOString().slice(0, 16)}
             onChange={(e) => setEndTime(new Date(e.target.value).toISOString())}
             className="border border-gray-300 rounded p-2 w-full"
+          />
+        </label>
+        <label className="block mb-4">
+          Break (minutes):
+          <input
+            type="number"
+            value={breakTime}
+            onChange={(e) => setBreakTime(parseInt(e.target.value, 10))}
+            className="border border-gray-300 rounded p-2 w-full"
+            min={0}
           />
         </label>
         <div className="flex justify-end">

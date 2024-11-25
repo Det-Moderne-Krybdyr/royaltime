@@ -49,6 +49,7 @@ model Shift {
   dayId     Int
   day       Day      @relation(fields: [dayId], references: [id])
   status    String   @default("default")
+  break     Int      @default(0) // Break duration in minutes
 }
 
 model HolidayRequest {
