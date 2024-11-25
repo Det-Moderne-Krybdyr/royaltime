@@ -11,6 +11,10 @@ const allowedEmails = [
 ];
 
 export async function middleware(request: NextRequest) {
+
+  const baseURL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+
   const session = await auth();
 
   const path = request.nextUrl.pathname;
@@ -35,7 +39,7 @@ export async function middleware(request: NextRequest) {
   // Fetch user role from an API endpoint
   let userRole;
   try {
-    const response = await fetch(`${request.nextUrl.origin}/api/users/role`, {
+    const response = await fetch(`${baseURL}/api/users/role`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
