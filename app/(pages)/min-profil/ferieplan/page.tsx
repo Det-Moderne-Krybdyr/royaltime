@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ const FerieplanPage = () => {
   const [requests, setRequests] = useState<HolidayRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<HolidayRequest | null>(
     null
   );
@@ -24,7 +25,7 @@ const FerieplanPage = () => {
   });
 
   // Fetch user's holiday requests
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     if (!session?.user?.email) return;
 
     try {
@@ -41,12 +42,16 @@ const FerieplanPage = () => {
 
       const data = await response.json();
       setRequests(data.ferieplan || []);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Something went wrong");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user?.email]);
 
   // Save updated holiday request
   const saveHolidayRequest = async (updatedRequest: HolidayRequest) => {
@@ -66,7 +71,6 @@ const FerieplanPage = () => {
         throw new Error("Failed to update holiday request");
       }
 
-      // Update local state
       setRequests((prevRequests) =>
         prevRequests.map((req) =>
           req.id === updatedRequest.id ? { ...req, ...updatedRequest } : req
@@ -74,8 +78,12 @@ const FerieplanPage = () => {
       );
 
       setSelectedRequest(null);
-    } catch (error) {
-      console.error("Error updating holiday request:", error);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Failed to update holiday request");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     }
   };
 
@@ -90,14 +98,18 @@ const FerieplanPage = () => {
         throw new Error("Failed to delete holiday request");
       }
 
-      // Update local state
+      alert("Holiday request deleted successfully!");
       setRequests((prevRequests) =>
         prevRequests.filter((req) => req.id !== requestId)
       );
 
       setSelectedRequest(null);
-    } catch (error) {
-      console.error("Error deleting holiday request:", error);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Failed to delete holiday request");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     }
   };
 
@@ -108,6 +120,7 @@ const FerieplanPage = () => {
       return;
     }
 
+    setSubmitting(true);
     try {
       const response = await fetch("/api/ferieplan/requests", {
         method: "POST",
@@ -123,32 +136,48 @@ const FerieplanPage = () => {
       }
 
       alert("Holiday request submitted successfully!");
-
-      // Clear the form
       setNewRequest({ startDate: "", endDate: "", reason: "" });
-
-      // Refresh the list of requests
       fetchRequests();
-    } catch (error) {
-      console.error("Error submitting holiday request:", error);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Failed to submit holiday request");
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
   useEffect(() => {
     fetchRequests();
-  }, [session?.user?.email]);
+  }, [fetchRequests]);
 
   if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p className="text-red-500">Error: {error}</p>;
+    return (
+      <div className="p-4">
+        <p>Loading your holiday requests...</p>
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-300 rounded mb-2"></div>
+          <div className="h-4 bg-gray-300 rounded mb-2"></div>
+          <div className="h-4 bg-gray-300 rounded"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Ferieplan</h1>
+
+      {error && (
+        <div className="text-red-500 bg-red-100 p-2 rounded mb-4">
+          <p>{error}</p>
+          <button onClick={() => setError(null)} className="text-sm underline">
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Holiday Request Form */}
       <div className="mb-6 p-4 border rounded bg-gray-50">
@@ -187,8 +216,8 @@ const FerieplanPage = () => {
             }
           />
         </div>
-        <Button className="mt-4" onClick={submitHolidayRequest}>
-          Submit Request
+        <Button className="mt-4" onClick={submitHolidayRequest} disabled={submitting}>
+          {submitting ? "Submitting..." : "Submit Request"}
         </Button>
       </div>
 
@@ -199,10 +228,7 @@ const FerieplanPage = () => {
       ) : (
         <div className="space-y-4">
           {requests.map((request) => (
-            <div
-              key={request.id}
-              className="border p-4 rounded-md bg-gray-50"
-            >
+            <div key={request.id} className="border p-4 rounded-md bg-gray-50">
               <p>
                 <strong>Start:</strong>{" "}
                 {new Date(request.startDate).toLocaleDateString()}
@@ -220,10 +246,7 @@ const FerieplanPage = () => {
                 </p>
               )}
               {request.status === "pending" && (
-                <Button
-                  className="mt-2"
-                  onClick={() => setSelectedRequest(request)}
-                >
+                <Button className="mt-2" onClick={() => setSelectedRequest(request)}>
                   Edit
                 </Button>
               )}

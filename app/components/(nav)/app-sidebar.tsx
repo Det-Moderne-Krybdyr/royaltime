@@ -5,7 +5,6 @@ import {
   CalendarDays,
   Plane,
   User,
-  Settings,
   Crown,
   Users,
 } from "lucide-react";
