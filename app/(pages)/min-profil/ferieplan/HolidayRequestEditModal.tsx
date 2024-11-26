@@ -42,7 +42,7 @@ const HolidayRequestEditModal: React.FC<HolidayRequestEditModalProps> = ({
           />
         </label>
         <label className="block mb-2">
-          End Date:
+          Slut Dato:
           <input
             type="date"
             value={endDate.split("T")[0]} // Convert ISO to YYYY-MM-DD
@@ -51,7 +51,7 @@ const HolidayRequestEditModal: React.FC<HolidayRequestEditModalProps> = ({
           />
         </label>
         <label className="block mb-4">
-          Reason (optional):
+          Årsag (valgfri):
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -63,20 +63,20 @@ const HolidayRequestEditModal: React.FC<HolidayRequestEditModalProps> = ({
             onClick={() => onDelete(holidayRequest.id)}
             className="bg-red-500 text-white px-4 py-2 rounded"
           >
-            Delete
+            Slet
           </button>
           <div>
             <button
               onClick={onClose}
               className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
             >
-              Cancel
+              Tilbage
             </button>
             <button
               onClick={handleSave}
               className="bg-blue-500 text-white px-4 py-2 rounded"
             >
-              Save
+              Gem
             </button>
           </div>
         </div>

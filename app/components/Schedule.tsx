@@ -165,14 +165,14 @@ const saveShift = async (updatedShift: Shift) => {
           variant={previousWeekAvailable ? "default" : "ghost"}
           disabled={!previousWeekAvailable}
         >
-          Previous Week
+          Tidligere uge
         </Button>
         <Button
           onClick={handleNextWeek}
           variant={nextWeekAvailable ? "default" : "ghost"}
           disabled={!nextWeekAvailable}
         >
-          Next Week
+          Næste uge
         </Button>
       </div>
 
@@ -201,7 +201,7 @@ const saveShift = async (updatedShift: Shift) => {
               <CardContent>
                 <Separator className="my-2" />
                 <Badge variant="destructive" className="mb-2">
-                  {absentees} Absent
+                  {absentees} Fraværende
                 </Badge>
                 <div className="mt-2">
                   {sortedShifts.map((shift) => (
@@ -233,10 +233,10 @@ const saveShift = async (updatedShift: Shift) => {
                         )}
                         <p className="text-sm italic">
                           {shift.type === ShiftType.AT_WORK
-                            ? "At work"
+                            ? "På arbejde"
                             : shift.type === ShiftType.SICK_LEAVE
-                            ? "Sick leave"
-                            : "Day off"}
+                            ? "Syg"
+                            : "Fridag"}
                         </p>
                         <p className="text-sm italic">
                           {shift.break} min pause

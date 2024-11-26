@@ -21,7 +21,7 @@ const ShiftEditModal: React.FC<ShiftEditModalProps> = ({ shift, onClose, onSave 
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
         <h2 className="text-xl font-bold mb-4">Edit Shift</h2>
         <label className="block mb-2">
-          Start Time:
+          Start tid:
           <input
             type="datetime-local"
             value={new Date(startTime).toISOString().slice(0, 16)}
@@ -30,7 +30,7 @@ const ShiftEditModal: React.FC<ShiftEditModalProps> = ({ shift, onClose, onSave 
           />
         </label>
         <label className="block mb-4">
-          End Time:
+          Slut tid:
           <input
             type="datetime-local"
             value={new Date(endTime).toISOString().slice(0, 16)}
@@ -39,7 +39,7 @@ const ShiftEditModal: React.FC<ShiftEditModalProps> = ({ shift, onClose, onSave 
           />
         </label>
         <label className="block mb-4">
-          Break (minutes):
+          Pause (minutter):
           <input
             type="number"
             value={breakTime}
@@ -53,10 +53,10 @@ const ShiftEditModal: React.FC<ShiftEditModalProps> = ({ shift, onClose, onSave 
             onClick={onClose}
             className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
           >
-            Cancel
+            Tilbage
           </button>
           <button onClick={handleSave} className="bg-blue-500 text-white px-4 py-2 rounded">
-            Save
+            Gem
           </button>
         </div>
       </div>

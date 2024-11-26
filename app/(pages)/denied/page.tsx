@@ -7,12 +7,12 @@ export default function Denied() {
     <div className="flex items-center justify-center h-screen">
       <Card className="w-full max-w-md text-center">
         <CardHeader>
-          <CardTitle>Access Denied</CardTitle>
+          <CardTitle>Adgang afvist</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="mb-4">You do not have permission to access this page.</p>
+          <p className="mb-4">Du har ikke adgang til denne side.</p>
           <Link href="/">
-            <Button variant="default">Back</Button>
+            <Button variant="default">Tilbage</Button>
           </Link>
         </CardContent>
       </Card>

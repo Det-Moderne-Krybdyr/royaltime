@@ -58,14 +58,14 @@ async function main() {
           if (!randomUser) break; // Stop if no users are left
 
           const shiftType = isWeekend
-            ? "day-off"
+            ? "Fridag"
             : Math.random() < 0.1
-            ? "sick-leave"
-            : "at-work";
+            ? "Syg"
+            : "På arbejde";
 
           shifts.push({
             startTime:
-              shiftType === "at-work"
+              shiftType === "På arbejde"
                 ? new Date(
                     baseDate.getFullYear(),
                     baseDate.getMonth(),
@@ -75,7 +75,7 @@ async function main() {
                   )
                 : null,
             endTime:
-              shiftType === "at-work"
+              shiftType === "På arbejde"
                 ? new Date(
                     baseDate.getFullYear(),
                     baseDate.getMonth(),
@@ -85,7 +85,7 @@ async function main() {
                   )
                 : null,
             type: shiftType,
-            status: shiftType === "at-work" ? "default" : "updated",
+            status: shiftType === "På arbejde" ? "default" : "updated",
             userId: randomUser.id,
           });
 
@@ -99,7 +99,7 @@ async function main() {
             baseDate.getMonth(),
             baseDate.getDate() + i
           ),
-          absences: shifts.filter((shift) => shift.type !== "at-work").length,
+          absences: shifts.filter((shift) => shift.type !== "På arbejde").length,
           shifts: {
             create: shifts,
           },

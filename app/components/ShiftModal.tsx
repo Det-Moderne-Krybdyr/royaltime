@@ -8,7 +8,12 @@ interface ShiftModalProps {
   onSave: (updatedShift: Shift) => void;
 }
 
-const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }) => {
+const ShiftModal: React.FC<ShiftModalProps> = ({
+  shift,
+  users,
+  onClose,
+  onSave,
+}) => {
   const [updatedShift, setUpdatedShift] = useState<Shift>(shift);
   const [userSearch, setUserSearch] = useState<string>("");
 
@@ -18,18 +23,20 @@ const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }
       )
     : [];
 
-  const formatTime = (time: string) => new Date(time).toISOString().split("T")[1].substring(0, 5);
+  const formatTime = (time: string) =>
+    new Date(time).toISOString().split("T")[1].substring(0, 5);
 
-  const parseTime = (date: string, time: string) => new Date(`${date}T${time}`).toISOString();
+  const parseTime = (date: string, time: string) =>
+    new Date(`${date}T${time}`).toISOString();
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4">Edit Shift</h2>
+        <h2 className="text-xl font-bold mb-4">Rediger vagt</h2>
 
         {/* User Search Field */}
         <label className="block mb-2">
-          User Name:
+          Name:
           <input
             type="text"
             value={userSearch}
@@ -57,7 +64,7 @@ const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }
 
         {/* Start Time */}
         <label className="block mb-2">
-          Start Time:
+          Start tid:
           <input
             type="time"
             value={formatTime(updatedShift.startTime)}
@@ -76,7 +83,7 @@ const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }
 
         {/* End Time */}
         <label className="block mb-2">
-          End Time:
+          Slut tid:
           <input
             type="time"
             value={formatTime(updatedShift.endTime)}
@@ -95,12 +102,15 @@ const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }
 
         {/* Break Duration */}
         <label className="block mb-4">
-          Break (minutes):
+          Pause (minutes):
           <input
             type="number"
             value={updatedShift.break || 0}
             onChange={(e) =>
-              setUpdatedShift({ ...updatedShift, break: parseInt(e.target.value) })
+              setUpdatedShift({
+                ...updatedShift,
+                break: parseInt(e.target.value),
+              })
             }
             className="border border-gray-300 rounded p-2 w-full"
             min="0"
@@ -120,9 +130,9 @@ const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }
             }
             className="border border-gray-300 rounded p-2 w-full"
           >
-            <option value="at-work">At work</option>
-            <option value="sick-leave">Sick leave</option>
-            <option value="day-off">Day off</option>
+            <option value="at-work">På arbejde</option>
+            <option value="sick-leave">Syg</option>
+            <option value="day-off">Ferie</option>
           </select>
         </label>
 
@@ -132,14 +142,14 @@ const ShiftModal: React.FC<ShiftModalProps> = ({ shift, users, onClose, onSave }
             onClick={onClose}
             className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
           >
-            Cancel
+            Tilbage
           </button>
           <button
             onClick={() => onSave(updatedShift)}
             className="bg-blue-500 text-white px-4 py-2 rounded"
             disabled={!updatedShift.user.name}
           >
-            Save
+            Gem
           </button>
         </div>
       </div>

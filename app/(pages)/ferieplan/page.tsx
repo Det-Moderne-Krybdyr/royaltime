@@ -39,7 +39,7 @@ const HolidayPlan = () => {
         weekNumber: data.weekNumber ?? weekNumber,
         days: data.days.map((day) => ({
           ...day,
-          shifts: day.shifts.filter((shift) => shift.type === "day-off"),
+          shifts: day.shifts.filter((shift) => shift.type === "Fridag"),
         })),
       });
 
@@ -98,14 +98,14 @@ const HolidayPlan = () => {
           variant={previousWeekAvailable ? "default" : "ghost"}
           disabled={!previousWeekAvailable}
         >
-          Previous Week
+          Tidligere uge
         </Button>
         <Button
           onClick={handleNextWeek}
           variant={nextWeekAvailable ? "default" : "ghost"}
           disabled={!nextWeekAvailable}
         >
-          Next Week
+          Næste uge 
         </Button>
       </div>
 
@@ -133,19 +133,19 @@ const HolidayPlan = () => {
                           <p className="font-semibold">
                             {shift.user?.name || "Unknown User"}
                           </p>
-                          <p className="text-sm italic">Day Off</p>
+                          <p className="text-sm italic">Fri</p>
                         </CardContent>
                       </Card>
                     ))
                   ) : (
-                    <p className="text-gray-500">No shifts for this day.</p>
+                    <p className="text-gray-500">Ingen fri denne dag.</p>
                   )}
                 </div>
               </CardContent>
             </Card>
           ))
         ) : (
-          <p>No days available in this week.</p>
+          <p>Ingen fri denne dag.</p>
         )}
       </div>
     </div>

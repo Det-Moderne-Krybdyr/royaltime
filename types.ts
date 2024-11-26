@@ -10,7 +10,7 @@ export interface Shift {
   startTime: string;
   endTime: string;
   user: User;
-  type: "at-work" | "sick-leave" | "day-off";
+  type: "På arbejde" | "Syg" | "Fridag";
   break: number;
 }
 
@@ -43,7 +43,8 @@ export interface HolidayRequest {
 }
 
 export enum ShiftType {
-  AT_WORK = "at-work",
-  SICK_LEAVE = "sick-leave",
-  DAY_OFF = "day-off",
+  AT_WORK = "På arbejde",
+  SICK_LEAVE = "Syg",
+  DAY_OFF = "Fridag",
 }
+

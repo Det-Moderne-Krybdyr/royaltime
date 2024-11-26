@@ -156,7 +156,7 @@ const FerieplanPage = () => {
   if (loading) {
     return (
       <div className="p-4">
-        <p>Loading your holiday requests...</p>
+        <p>Henter ferie...</p>
         <div className="animate-pulse">
           <div className="h-4 bg-gray-300 rounded mb-2"></div>
           <div className="h-4 bg-gray-300 rounded mb-2"></div>
@@ -181,10 +181,10 @@ const FerieplanPage = () => {
 
       {/* Holiday Request Form */}
       <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h2 className="text-lg font-bold mb-2">Request a New Holiday</h2>
+        <h2 className="text-lg font-bold mb-2">Ansøg om ferie</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="startDate">Start Date</Label>
+            <Label htmlFor="startDate">Start Dato</Label>
             <Input
               type="date"
               id="startDate"
@@ -195,7 +195,7 @@ const FerieplanPage = () => {
             />
           </div>
           <div>
-            <Label htmlFor="endDate">End Date</Label>
+            <Label htmlFor="endDate">Slut Dato</Label>
             <Input
               type="date"
               id="endDate"
@@ -207,7 +207,7 @@ const FerieplanPage = () => {
           </div>
         </div>
         <div className="mt-4">
-          <Label htmlFor="reason">Reason (Optional)</Label>
+          <Label htmlFor="reason">Årsag (Valgfri)</Label>
           <Textarea
             id="reason"
             value={newRequest.reason}
@@ -222,9 +222,9 @@ const FerieplanPage = () => {
       </div>
 
       {/* Display User's Holiday Requests */}
-      <h2 className="text-lg font-bold mb-4">Your Holiday Requests</h2>
+      <h2 className="text-lg font-bold mb-4">Dine Ferie Anmodninger</h2>
       {requests.length === 0 ? (
-        <p>No holiday requests found.</p>
+        <p>Ingen ferie anmodninger fundet.</p>
       ) : (
         <div className="space-y-4">
           {requests.map((request) => (
@@ -234,7 +234,7 @@ const FerieplanPage = () => {
                 {new Date(request.startDate).toLocaleDateString()}
               </p>
               <p>
-                <strong>End:</strong>{" "}
+                <strong>Slut:</strong>{" "}
                 {new Date(request.endDate).toLocaleDateString()}
               </p>
               <p>
@@ -242,12 +242,12 @@ const FerieplanPage = () => {
               </p>
               {request.reason && (
                 <p>
-                  <strong>Reason:</strong> {request.reason}
+                  <strong>Årsag:</strong> {request.reason}
                 </p>
               )}
               {request.status === "pending" && (
                 <Button className="mt-2" onClick={() => setSelectedRequest(request)}>
-                  Edit
+                  Rediger
                 </Button>
               )}
             </div>

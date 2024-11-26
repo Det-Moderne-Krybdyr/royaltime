@@ -121,7 +121,7 @@ export default function Page() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold">User Management</h1>
+      <h1 className="text-3xl font-bold">Bruger kontrol</h1>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-2">
           <Input
@@ -144,20 +144,20 @@ export default function Page() {
               })
             }
           >
-            <option value="user">User</option>
+            <option value="user">Bruger</option>
             <option value="admin">Admin</option>
           </select>
-          <Button onClick={handleAddUser}>Add User</Button>
+          <Button onClick={handleAddUser}>Tilføj bruger</Button>
         </div>
       </div>
 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <TableHead>Navn</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Rolle</TableHead>
+            <TableHead>Handling</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -174,13 +174,13 @@ export default function Page() {
                     setDialogOpen(true);
                   }}
                 >
-                  Edit
+                  Rediger
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={() => handleDeleteUser(user.email)}
                 >
-                  Delete
+                  Slet
                 </Button>
               </TableCell>
             </TableRow>
@@ -192,7 +192,7 @@ export default function Page() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
+              <DialogTitle>Rediger bruger</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <Input
@@ -219,13 +219,13 @@ export default function Page() {
                   })
                 }
               >
-                <option value="user">User</option>
+                <option value="user">Bruger</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
             <div className="flex justify-end mt-4 space-x-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                Tilbage
               </Button>
               <Button onClick={handleEditUser}>Save</Button>
             </div>
