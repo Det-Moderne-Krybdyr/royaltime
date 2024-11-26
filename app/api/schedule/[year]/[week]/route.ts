@@ -3,20 +3,24 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ week: string }> } // Correctly typed as Promise
+  context: { params: { year: string; week: string } }
 ) {
   try {
-    // Await `params` as required in the app directory
-    const { week } = await context.params;
+    const { year, week } = await context.params;
 
-    // Validate the week parameter
-    if (!week || isNaN(Number(week))) {
-      return NextResponse.json({ error: 'Invalid week parameter' }, { status: 400 });
+    // Validate year and week parameters
+    if (!year || isNaN(Number(year)) || !week || isNaN(Number(week))) {
+      return NextResponse.json({ error: 'Invalid year or week parameter' }, { status: 400 });
     }
 
-    // Fetch week data
+    // Fetch week data by year and week number
     const weekData = await prisma.week.findUnique({
-      where: { weekNumber: parseInt(week, 10) }, // Convert `week` to a number
+      where: {
+        weekNumber_year: {
+          weekNumber: parseInt(week, 10),
+          year: parseInt(year, 10),
+        },
+      },
       include: {
         days: {
           include: {
@@ -41,13 +45,9 @@ export async function GET(
       return NextResponse.json({ error: 'Week not found' }, { status: 404 });
     }
 
-    // Return the week data
     return NextResponse.json(weekData);
   } catch (error) {
     console.error('Error fetching week data:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

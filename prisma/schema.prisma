@@ -9,8 +9,10 @@ generator client {
 
 model Week {
   id         Int   @id @default(autoincrement())
-  weekNumber Int   @unique
+  weekNumber Int
+  year       Int
   days       Day[]
+  @@unique([weekNumber, year]) // Ensure unique week/year combination
 }
 
 model Day {

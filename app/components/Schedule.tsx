@@ -8,14 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "next-auth/react";
+import { getISOWeek } from "date-fns";
 
 const Schedule = () => {
   const { data: session } = useSession();
+  const [state, setState] = useState({
+    week: getISOWeek(new Date()),
+    year: new Date().getFullYear(),
+  });
   const [currentWeek, setCurrentWeek] = useState<Week | null>(null);
-  const [currentWeekIndex, setCurrentWeekIndex] = useState(47);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [userRecords, setUserRecords] = useState<User[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false); // State to track admin role
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [nextWeekAvailable, setNextWeekAvailable] = useState(true);
+  const [previousWeekAvailable, setPreviousWeekAvailable] = useState(true);
 
   // Check user role
   const fetchUserRole = useCallback(async () => {
@@ -48,18 +54,38 @@ const Schedule = () => {
     }
   }, []);
 
-  // Fetch week data
-  const fetchWeekData = useCallback(async (weekNumber: number) => {
+  // Check if a week exists in the database
+  const checkWeekExists = async (week: number, year: number): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/schedule/${weekNumber}`);
-      if (!response.ok) throw new Error("Failed to fetch week data");
-      const data: Week = await response.json();
+      const response = await fetch(`/api/schedule/${year}/${week}`);
+      return response.ok; // Return true if the week exists
+    } catch (error) {
+      console.error("Error checking week availability:", error);
+      return false;
+    }
+  };
 
+  // Fetch week data
+  const fetchWeekData = useCallback(async (weekNumber: number, year: number) => {
+    try {
+      const response = await fetch(`/api/schedule/${year}/${weekNumber}`);
+      if (!response.ok) throw new Error("Failed to fetch week data");
+
+      const data: Week = await response.json();
       setCurrentWeek({
         id: data.id ?? 0,
         weekNumber: data.weekNumber ?? weekNumber,
         days: data.days,
       });
+
+      // Check availability of next/previous weeks
+      const nextWeek = weekNumber === 52 ? 1 : weekNumber + 1;
+      const nextYear = weekNumber === 52 ? year + 1 : year;
+      const prevWeek = weekNumber === 1 ? 52 : weekNumber - 1;
+      const prevYear = weekNumber === 1 ? year - 1 : year;
+
+      setNextWeekAvailable(await checkWeekExists(nextWeek, nextYear));
+      setPreviousWeekAvailable(await checkWeekExists(prevWeek, prevYear));
     } catch (error) {
       console.error("Error fetching week data:", error);
       setCurrentWeek(null);
@@ -67,41 +93,50 @@ const Schedule = () => {
   }, []);
 
   // Pagination handlers
-  const handlePreviousWeek = () => {
-    if (currentWeekIndex > 1) {
-      setCurrentWeekIndex((prevIndex) => prevIndex - 1);
+  const handlePreviousWeek = async () => {
+    const prevWeek = state.week === 1 ? 52 : state.week - 1;
+    const prevYear = state.week === 1 ? state.year - 1 : state.year;
+
+    if (await checkWeekExists(prevWeek, prevYear)) {
+      setState({ week: prevWeek, year: prevYear });
     }
   };
 
-  const handleNextWeek = () => {
-    setCurrentWeekIndex((prevIndex) => prevIndex + 1);
+  const handleNextWeek = async () => {
+    const nextWeek = state.week === 52 ? 1 : state.week + 1;
+    const nextYear = state.week === 52 ? state.year + 1 : state.year;
+
+    if (await checkWeekExists(nextWeek, nextYear)) {
+      setState({ week: nextWeek, year: nextYear });
+    }
   };
 
   // Save shift to API
-  const saveShift = async (updatedShift: Shift) => {
-    try {
-      const response = await fetch(`/api/shifts/${updatedShift.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedShift),
-      });
-      if (!response.ok) throw new Error("Failed to save shift");
+const saveShift = async (updatedShift: Shift) => {
+  try {
+    const response = await fetch(`/api/shifts/${updatedShift.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedShift),
+    });
+    if (!response.ok) throw new Error("Failed to save shift");
 
-      const updatedShiftData = await response.json();
+    const updatedShiftData = await response.json();
 
-      // Update shifts locally
-      const updatedDays = currentWeek?.days.map((day) => ({
-        ...day,
-        shifts: day.shifts.map((shift) =>
-          shift.id === updatedShift.id ? updatedShiftData : shift
-        ),
-      }));
+    // Update shifts locally
+    const updatedDays = currentWeek?.days.map((day) => ({
+      ...day,
+      shifts: day.shifts.map((shift) =>
+        shift.id === updatedShift.id ? updatedShiftData : shift
+      ),
+    }));
 
-      if (updatedDays) setCurrentWeek({ ...currentWeek, days: updatedDays });
-    } catch (error) {
-      console.error("Error saving shift:", error);
-    }
-  };
+    if (updatedDays) setCurrentWeek({ ...currentWeek, days: updatedDays });
+  } catch (error) {
+    console.error("Error saving shift:", error);
+  }
+};
+
 
   // Fetch data on component load
   useEffect(() => {
@@ -110,8 +145,8 @@ const Schedule = () => {
   }, [fetchUsers, fetchUserRole]);
 
   useEffect(() => {
-    fetchWeekData(currentWeekIndex);
-  }, [fetchWeekData, currentWeekIndex]);
+    fetchWeekData(state.week, state.year);
+  }, [fetchWeekData, state]);
 
   if (!currentWeek) {
     return <div>Loading...</div>;
@@ -119,18 +154,24 @@ const Schedule = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Uge {currentWeek.weekNumber}</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Uge {currentWeek.weekNumber}, {state.year}
+      </h1>
 
       {/* Pagination Controls */}
       <div className="flex justify-between mb-4">
         <Button
           onClick={handlePreviousWeek}
-          variant={currentWeekIndex === 1 ? "ghost" : "default"}
-          disabled={currentWeekIndex === 1}
+          variant={previousWeekAvailable ? "default" : "ghost"}
+          disabled={!previousWeekAvailable}
         >
           Previous Week
         </Button>
-        <Button onClick={handleNextWeek} variant="default">
+        <Button
+          onClick={handleNextWeek}
+          variant={nextWeekAvailable ? "default" : "ghost"}
+          disabled={!nextWeekAvailable}
+        >
           Next Week
         </Button>
       </div>
@@ -210,7 +251,7 @@ const Schedule = () => {
         })}
       </div>
 
-      {selectedShift && isAdmin && ( // Render modal only if admin
+      {selectedShift && isAdmin && (
         <ShiftModal
           shift={selectedShift}
           users={userRecords}
