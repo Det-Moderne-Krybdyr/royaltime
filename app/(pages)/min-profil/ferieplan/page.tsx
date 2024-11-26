@@ -56,7 +56,7 @@ const FerieplanPage = () => {
   // Save updated holiday request
   const saveHolidayRequest = async (updatedRequest: HolidayRequest) => {
     try {
-      const response = await fetch(`/api/ferieplan/requests/${updatedRequest.id}`, {
+      const response = await fetch(`/api/ferieplan/requests/${updatedRequest.id}/edit`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -36,7 +36,7 @@ const HolidayAdmin = () => {
   // Update holiday request and shifts
   const updateHolidayRequest = async (request: HolidayRequest) => {
     try {
-      const response = await fetch(`/api/ferieplan/requests/${request.id}`, {
+      const response = await fetch(`/api/ferieplan/requests/${request.id}/approve`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -62,7 +62,7 @@ const HolidayAdmin = () => {
   // Delete holiday request
   const deleteHolidayRequest = async (id: number) => {
     try {
-      const response = await fetch(`/api/ferieplan/requests/${id}`, {
+      const response = await fetch(`/api/ferieplan/requests/${id}/approve`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to delete holiday request");
