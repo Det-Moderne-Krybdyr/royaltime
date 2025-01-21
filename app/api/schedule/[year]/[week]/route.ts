@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ year: string; week: string }> } // Correct type for params
+  context: { params: Promise<{ year: string; week: string }> } // Adjusted type for async params
 ) {
   try {
-    const { year, week } = await context.params; // Directly access params
+    // Await `params` because it is asynchronous
+    const { year, week } = await context.params;
 
     // Validate year and week parameters
     if (!year || isNaN(Number(year)) || !week || isNaN(Number(week))) {
@@ -34,6 +35,13 @@ export async function GET(
                     id: true,
                     name: true,
                     email: true,
+                  },
+                },
+                jobType: {
+                  select: {
+                    id: true,
+                    name: true,
+                    color: true,
                   },
                 },
               },

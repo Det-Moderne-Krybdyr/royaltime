@@ -10,6 +10,21 @@ async function main() {
   await prisma.week.deleteMany();
   await prisma.holidayRequest.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.jobType.deleteMany();
+
+  // Seed job types with colors
+  const jobTypes = [
+    { name: "Butik", color: "#fdf5cc" }, // Light Yellow
+    { name: "Kommunikation", color: "#d9e2f3" }, // Light Blue
+    { name: "Kundesupport", color: "#d4f4e0" }, // Light Green
+    { name: "Kurer", color: "#fce4ec" }, // Light Pink
+    { name: "Leder", color: "#cce4f6" }, // Light Cyan
+    { name: "Tilbudsgiver", color: "#e7f3d4" }, // Light Olive
+    { name: "Udvikler", color: "#f4e4d4" }, // Light Orange
+  ];
+  
+  await prisma.jobType.createMany({ data: jobTypes });
+  const jobTypeRecords = await prisma.jobType.findMany();
 
   // Seed users
   const users = [];
@@ -28,9 +43,12 @@ async function main() {
     const availableUsers = userRecords.filter(
       (user) => !usedUserIds.has(user.id)
     );
-    return availableUsers[
-      Math.floor(Math.random() * availableUsers.length)
-    ];
+    return availableUsers[Math.floor(Math.random() * availableUsers.length)];
+  };
+
+  // Helper function to get random job type
+  const getRandomJobType = () => {
+    return jobTypeRecords[Math.floor(Math.random() * jobTypeRecords.length)];
   };
 
   // Function to create weeks
@@ -87,6 +105,7 @@ async function main() {
             type: shiftType,
             status: shiftType === "På arbejde" ? "default" : "updated",
             userId: randomUser.id,
+            jobTypeId: getRandomJobType().id, // Assign random job type
           });
 
           usedUserIds.add(randomUser.id);
@@ -99,7 +118,8 @@ async function main() {
             baseDate.getMonth(),
             baseDate.getDate() + i
           ),
-          absences: shifts.filter((shift) => shift.type !== "På arbejde").length,
+          absences: shifts.filter((shift) => shift.type !== "På arbejde")
+            .length,
           shifts: {
             create: shifts,
           },

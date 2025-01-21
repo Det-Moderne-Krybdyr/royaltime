@@ -12,6 +12,7 @@ model Week {
   weekNumber Int
   year       Int
   days       Day[]
+
   @@unique([weekNumber, year]) // Ensure unique week/year combination
 }
 
@@ -22,7 +23,7 @@ model Day {
   absences Int
   weekId   Int
   week     Week     @relation(fields: [weekId], references: [id])
-  shifts   Shift[] // One-to-many relation with shifts
+  shifts   Shift[]  // One-to-many relation with shifts
 }
 
 model User {
@@ -36,31 +37,40 @@ model User {
   Authenticator   Authenticator[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  shifts          Shift[] // One-to-many relation with shifts
+  shifts          Shift[]          // One-to-many relation with shifts
   role            UserRole         @default(user)
   holidayRequests HolidayRequest[] // Relation to holiday requests
 }
 
+model JobType {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  color String // Color field for job type
+
+  shifts Shift[] // One-to-many relation with shifts
+}
+
 model Shift {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   startTime DateTime?
   endTime   DateTime?
-  type      String
+  type      String    // Ensure this field exists in your schema
+  status    String    @default("default")
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
   dayId     Int
-  day       Day      @relation(fields: [dayId], references: [id])
-  status    String   @default("default")
-  break     Int      @default(0) // Break duration in minutes
+  day       Day       @relation(fields: [dayId], references: [id])
+  jobTypeId Int
+  jobType   JobType   @relation(fields: [jobTypeId], references: [id])
 }
 
 model HolidayRequest {
   id        Int      @id @default(autoincrement())
-  userId    String // Relation to the user
+  userId    String   // Relation to the user
   user      User     @relation(fields: [userId], references: [id])
   startDate DateTime
   endDate   DateTime
-  reason    String? // Optional reason for the holiday request
+  reason    String?  // Optional reason for the holiday request
   status    String   @default("pending") // Request status: pending, approved, or rejected
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -105,7 +115,6 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
-// Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
   userId               String
