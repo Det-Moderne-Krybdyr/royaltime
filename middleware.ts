@@ -8,6 +8,7 @@ const allowedEmails = [
   "lucasbarlach@gmail.com",
   "user2@example.com",
   "user3@example.com",
+  "kanygladteknik@gmail.com",
 ];
 
 export async function middleware(request: NextRequest) {
