@@ -1,51 +1,36 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma"; // Assuming you have a global Prisma client
 
+// GET: Fetch all users
 export async function GET() {
   try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      },
-    });
+    const users = await prisma.user.findMany();
     return NextResponse.json(users);
   } catch (error) {
-    console.error("Failed to fetch users:", error);
+    console.error("Error fetching users:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
 }
 
-// POST: Create a new user
-export async function POST(request: Request) {
+// POST: Add a new user
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
+    const { name, email, role } = await req.json();
 
-    // Validate the request body
-    if (!body.name || !body.email) {
+    if (!name || !email || !role) {
       return NextResponse.json(
-        { error: "Name and email are required" },
+        { error: "Name, email, and role are required" },
         { status: 400 }
       );
     }
 
-    // Create a new user
     const newUser = await prisma.user.create({
-      data: {
-        name: body.name,
-        email: body.email,
-        // Add other fields as necessary
-      },
+      data: { name, email, role },
     });
 
-    return NextResponse.json(newUser, { status: 201 }); // Return the created user
+    return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
-    console.error("Error creating user:", error);
-    return NextResponse.json(
-      { error: "Failed to create user" },
-      { status: 500 }
-    );
+    console.error("Error adding user:", error);
+    return NextResponse.json({ error: "Failed to add user" }, { status: 500 });
   }
 }

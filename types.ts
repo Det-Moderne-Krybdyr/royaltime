@@ -2,6 +2,14 @@ export interface User {
   id: string; // Matches the database's user ID type
   name: string;
   email: string;
+  phone?: string;
+  employment_date?: string;
+  primary_position?: string;
+  secoundary_position?: string;
+  prio_list?: string;
+  salary_number?: string;
+  hourly_wage?: number;
+  sick_hourly_wage?: number;
   role: "admin" | "user";
 }
 

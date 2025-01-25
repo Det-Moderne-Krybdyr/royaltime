@@ -31,7 +31,6 @@ const data = {
     { title: "Min profil", url: "/min-profil", icon: User },
   ],
   navAdmin: [
-    { title: "Vagtplan", url: "/admin/vagtplan", icon: CalendarDays },
     { title: "Ferieplan", url: "/admin/ferieplan", icon: Plane },
     { title: "Brugere", url: "/admin/brugere", icon: Users  },
     { title: "Indstillinger", url: "/admin/indstillinger", icon: Plane },
