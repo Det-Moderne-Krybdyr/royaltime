@@ -16,7 +16,7 @@ const Schedule = () => {
   const [userRecords, setUserRecords] = useState<User[]>([]);
   const [filter, setFilter] = useState({ user: "", jobType: "" });
   const [nextWeekAvailable, setNextWeekAvailable] = useState(true);
-  const [previousWeekAvailable, setPreviousWeekAvailable] = useState(true);;
+  const [previousWeekAvailable, setPreviousWeekAvailable] = useState(true);
 
   // Fetch users
   const fetchUsers = useCallback(async () => {
@@ -100,10 +100,19 @@ const Schedule = () => {
     fetchWeekData(state.week, state.year);
   }, [fetchWeekData, state]);
 
-  // Filter and sort shifts to only show those with type "På arbejde"
+  // Filter and sort shifts to apply user and job type filters
   const filterAndSortShifts = (shifts: Shift[]) => {
     return shifts
-      .filter((shift) => shift.type === "På arbejde")
+      .filter((shift) => {
+        // Apply user filter if selected
+        if (filter.user && shift.user?.id !== filter.user) return false;
+
+        // Apply job type filter if selected
+        if (filter.jobType && shift.jobType?.name !== filter.jobType) return false;
+
+        // Default to showing "På arbejde" type shifts
+        return shift.type === "På arbejde";
+      })
       .sort(
         (a, b) =>
           new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
@@ -151,8 +160,8 @@ const Schedule = () => {
         >
           <option value="">Filter by Job Type</option>
           {currentWeek.days
-            .flatMap((day) => day.shifts.map((shift) => shift.jobType.name))
-            .filter((name, index, arr) => arr.indexOf(name) === index) // Unique job types
+            .flatMap((day) => day.shifts.map((shift) => shift.jobType?.name))
+            .filter((name, index, arr) => name && arr.indexOf(name) === index) // Unique job types
             .map((name) => (
               <option key={name} value={name}>
                 {name}
@@ -176,23 +185,23 @@ const Schedule = () => {
                 {filterAndSortShifts(day.shifts).map((shift) => (
                   <Card
                     key={shift.id}
-                    style={{ backgroundColor: shift.jobType.color }}
+                    style={{ backgroundColor: shift.jobType?.color }}
                     className="p-2 mb-2 rounded cursor-pointer shadow"
                   >
                     <CardContent className="text-center">
-                      <p className="font-semibold">{shift.user.name}</p>
+                      <p className="font-semibold">{shift.user?.name}</p>
                       <p className="text-sm">
                         {new Date(shift.startTime).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
-                        })} - {" "}
+                        })}{" "}
+                        -{" "}
                         {new Date(shift.endTime).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
                       </p>
-                      <p className="text-sm italic"> {shift.id}</p>
-                      <p className="text-sm italic">{shift.jobType.name}</p>
+                      <p className="text-sm italic">{shift.jobType?.name}</p>
                     </CardContent>
                   </Card>
                 ))}
